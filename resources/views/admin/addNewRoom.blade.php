@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>Harbor View</title>
+    <title>HOSS</title>
         <!-- CSS -->
-            <link rel="shortcut icon" href="{{ URL('/img/whitelogo.png')}}" type="image/x-icon">
+            <link rel="shortcut icon" href="{{ URL('/img/icon.png')}}" type="image/x-icon">
             <link href="{{ asset('/css/adminDashboard.css') }}" rel="stylesheet">
         <!-- CSS -->
     @include('cdn')
@@ -35,13 +35,13 @@
                                 </ul>
                             </div>
                         </div>
-                    </nav>              
+                    </nav>
                 <!-- NAV BAR -->
 
                 <!-- MAIN CONTENT -->
                     <div class="container-fluid mainBar">
                         <div class="card p-5 bg-body rounded-0 shadow-lg">
-                            <h5 class="mb-4 text-lg-start text-center">NEW DETAILS OF ROOM</h5>
+                            <h5 class="mb-4 text-lg-start text-center">ADD NEW ROOM</h5>
                             <ul class="nav nav-tabs mb-4">
                                 <li class="nav-item">
                                     <a class="nav-link active" href="/adminRoom">Available Room</a>
@@ -56,7 +56,7 @@
                                         <div class="col-12">
                                             <div class="mb-3">
                                                 <label class="form-label">Image of Room</label>
-                                                <input required class="form-control shadow-sm bg-body rounded-0" type="file" name="roomPhoto" accept="image/png, image/jpg, image/jpeg, image/gif, image/svg">
+                                                <input required class="form-control shadow-sm bg-body rounded-0" type="file" id="roomPhoto" name="roomPhoto" accept="image/png, image/jpg, image/jpeg, image/gif, image/svg">
                                             </div>
                                         </div>
                                     </div>
@@ -64,7 +64,7 @@
                                         <div class="col-2">
                                             <div class="mb-3">
                                                 <label class="form-label">Room Number:</label>
-                                                <input required class="form-control shadow-sm rounded-0" type="text"  id="roomNumber" name="roomNumber">
+                                                <input required class="form-control shadow-sm rounded-0" type="number"  id="roomNumber" name="roomNumber" placeholder="00#">
                                             </div>
                                         </div>
                                         <div class="col-2">
@@ -82,12 +82,10 @@
                                             <div class="mb-3">
                                                 <label class="form-label">Type of Room:</label>
                                                 <select class="form-select shadow-sm rounded-0" aria-label="Default select example" id="roomType" name="roomType">
-                                                    <option value="Single Room" selected>Single Room</option>
-                                                    <option value="Twin Room">Twin Room</option>
-                                                    <option value="Double Room">Double Room</option>
-                                                    <option value="Triple Room">Triple Room</option>
-                                                    <option value="Quad Room">Quad Room</option>
-                                                    <option value="Interconnecting Room">Interconnecting Room</option>
+                                                    <option value="Standard Room" selected>Standard Room</option>
+                                                    <option value="Superior Double Room">Superior Double Room</option>
+                                                    <option value="Single Deluxe Room">Single Deluxe Room</option>
+                                                    <option value="Executive Deluxe King Room">Executive Deluxe King Room</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -105,8 +103,8 @@
                                         </div>
                                         <div class="col-2">
                                             <div class="mb-3">
-                                                <label class="form-label">Price Per Hour</label>
-                                                <input required class="form-control shadow-sm rounded-0" type="text"  id="pricePerHour" name="pricePerHour">
+                                                <label class="form-label">Price Per Night</label>
+                                                <input required class="form-control shadow-sm rounded-0" type="number"  id="pricePerHour" name="pricePerHour">
                                             </div>
                                         </div>
                                     </div>

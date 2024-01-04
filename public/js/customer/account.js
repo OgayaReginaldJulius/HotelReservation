@@ -10,42 +10,72 @@ $(document).ready(function(){
 // MANAGE EMPLOYEES
     $('#updateUserAccount').on( 'submit' , function(e){
         e.preventDefault();
-        console.log(document.getElementById("userAge").value);
         if(document.getElementById("userAge").value < 5){
             Swal.fire(
                 'Update Failed',
                 'Sorry Invalid Age',
                 'error'
             )
-        }else{
-            var currentForm = $('#updateUserAccount')[0];
-            var data = new FormData(currentForm);
+        }else {
+            const firstName = $('#userFirstName').val();
+            const middleName = $('#userMiddleName').val();
+            const lastName = $('#userLastName').val();
+            const age = $('#userAge').val();
+
+            var regex = /[0-9!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/;
+            if (regex.test(firstName) || regex.test(middleName) || regex.test(lastName)) {
+                manageAccount();
+                Swal.fire(
+                    'Update Failed',
+                    'First name, middle name, and last name must not contain digits or special characters.',
+                    'error'
+                );
+            }else if (firstName.length < 3 || middleName.length < 3 || lastName.length < 3) {
+                manageAccount();
+                Swal.fire(
+                    'Update Failed',
+                    'The first name, middle name, and last name must be at least 3 characters long.',
+                    'error'
+                );
+            } else if (age < 18) {
+                manageAccount();
+                Swal.fire(
+                    'Update Failed',
+                    'Age restriction: No minors allowed at the hotel.',
+                    'error'
+                );
+            }else {
+                var currentForm = $('#updateUserAccount')[0];
+                var data = new FormData(currentForm);
                 $.ajax({
                     url: "/updateUserAccount",
-                    type:"post",
-                    method:"post",
+                    type: "post",
+                    method: "post",
                     dataType: "text",
-                    data:data,
+                    data: data,
                     cache: false,
                     contentType: false,
                     processData: false,
-                    success:function(response){
-                        if(response == 1){
-                            manageAccount();
-                            $("#updateUserAccount").trigger("reset");
+                    success: function (response) {
+                        if (response == 1) {
                             Swal.fire({
-                                position: 'center',
+                                title: 'Update Successfully',
+                                text: "New information has stored",
                                 icon: 'success',
-                                title: 'INFORMATION HAS BEEN UPDATE SUCCESSFULLY',
                                 showConfirmButton: false,
-                                timer: 1500
-                            })
+                                timer: 1500,
+                            }).then((result) => {
+                            if (result) {
+                                manageAccount();
+                            }
+                            });
                         }
                     },
-                    error:function(error){
-                        console.log(error)
+                    error: function (error) {
+                        console.log(error);
                     }
-            }) 
+                });
+            }
         }
     });
 // MANAGE EMPLOYEES
@@ -58,32 +88,28 @@ $(document).ready(function(){
             dataType: 'json',
         })
         .done(function(response) {
-            $('#userUniqueId').val(response.user_id )           
-            $('#userLastName').val(response.lastname)           
-            $('#userFirstName').val(response.firstname)           
-            $('#userMiddleName').val(response.middlename)           
-            $('#userExtention').val(response.extention)           
-            $('#userBirthday').val(response.birthday)           
-            $('#userPhoneNumber').val(response.phoneNumber)           
-            $('#userAge').val(response.age)           
-            $('#updateEmployeeEmail').val(response.email)        
-            if(response.extention != ''){
-                $('#userExtention').val(response.extention)           
-            }else{
-                $('#userExtention').val      
-            }    
+            $('#userUniqueId').val(response.user_id )
+            $('#userLastName').val(response.lastname)
+            $('#userFirstName').val(response.firstname)
+            $('#userMiddleName').val(response.middlename)
+            $('#userExtension').val(response.extention)
+            $('#userBirthday').val(response.birthday)
+            $('#userEmail').val(response.email)
+            $('#userPhoneNumber').val(response.phoneNumber)
+            $('#userAge').val(response.age);
+            $('#updateEmployeeEmail').val(response.email)
             if(response.photos != ''){
                 $('#userProfile').attr("src",response.photos)
             }else{
                 $('#userProfile').attr("src","/storage/employees/defaultImage.png")
-            }      
+            }
         })
     }
 // FETCH INFO MANAGE ACCOUNT
 
-// GENERATE AGE 
+// GENERATE AGE
     function calculateAge() {
-        var birthDate = new Date($('#userBirthday').val()); 
+        var birthDate = new Date($('#userBirthday').val());
         var birthDateDay = birthDate.getDate();
         var birthDateMonth = birthDate.getMonth();
         var birthDateYear = birthDate.getFullYear();
@@ -96,12 +122,12 @@ $(document).ready(function(){
         var calculateAge = 0;
 
         if(todayMonth > birthDateMonth) calculateAge  = todayYear - birthDateYear;
-        else calculateAge = todayYear - birthDateYear - 1; 
+        else calculateAge = todayYear - birthDateYear - 1;
 
         var outputValue = calculateAge;
         document.getElementById("userAge").value = calculateAge;
     }
-// GENERATE AGE 
+// GENERATE AGE
 
 // FUNCTION FOR PASSWORD ENABLE
     function seePassword() {
@@ -117,6 +143,6 @@ $(document).ready(function(){
             a.type="password";
             b.type="password";
         }
-        
+
     }
 // FUNCTION FOR PASSWORD ENABLE

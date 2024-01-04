@@ -9,9 +9,9 @@
     {{-- CSS --}}
         <link href="{{ asset('/css/customerDashboard.css') }}" rel="stylesheet">
         <link href="{{ asset('/css/sideBar.css') }}" rel="stylesheet">
-        <link rel="shortcut icon" href="{{ URL('/img/whitelogo.png')}}" type="image/x-icon">
+        <link rel="shortcut icon" href="{{ URL('/img/icon.png')}}" type="image/x-icon">
     {{-- CSS --}}
-    <title>Harbor View</title>
+    <title>HOSS</title>
 </head>
 <body>
 
@@ -50,7 +50,7 @@
                                     <a class="nav-link active" href="#">&nbsp;&nbsp;Information&nbsp;&nbsp;</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/adminCredentials">Credentials</a>
+                                    <a class="nav-link" href="/customerCredentials">Credentials</a>
                                 </li>
                             </ul>
                             {{-- INFO --}}
@@ -63,7 +63,7 @@
                                                 <input class="form-control shadow-sm bg-body rounded-0" type="file" name="userProfile" accept="image/png, image/jpg, image/jpeg, image/gif, image/svg">
                                             </div>
                                         </div>
-                                        <div class="col-3 text-center">
+                                        <div class="col-3 text-start ps-4">
                                             <div class="mb-3">
                                                 <img class="img-thumbnail border-0 profilePicture" id="userProfile" style="height:170px;" src="">
                                             </div>
@@ -73,50 +73,57 @@
                                         <div class="col-3">
                                             <div class="mb-3">
                                                 <label class="form-label">First Name:</label>
-                                                <input required class="form-control shadow-sm rounded-0" type="text"  id="userFirstName" name="userFirstName">
+                                                <input readonly required class="form-control shadow-sm rounded-0" type="text"  id="userFirstName" name="userFirstName">
                                                 <input required class="form-control shadow-sm rounded-0" type="hidden" id="userUniqueId" name="userUniqueId">
                                             </div>
                                         </div>
                                         <div class="col-3">
                                             <div class="mb-3">
                                                 <label class="form-label">Middle Name:</label>
-                                                <input class="form-control shadow-sm rounded-0" type="text"  id="userMiddleName"  name="userMiddleName" >
+                                                <input readonly class="form-control shadow-sm rounded-0" type="text"  id="userMiddleName"  name="userMiddleName" >
                                             </div>
                                         </div>
                                         <div class="col-3">
                                             <div class="mb-3">
                                                 <label class="form-label">Last Name:</label>
-                                                <input required class="form-control shadow-sm rounded-0" type="text"  id="userLastName"  name="userLastName" >
+                                                <input readonly required class="form-control shadow-sm rounded-0" type="text"  id="userLastName"  name="userLastName" >
                                             </div>
                                         </div>
                                         <div class="col-2">
                                             <div class="mb-3">
                                                 <label class="form-label">Extention: </label>
-                                                <select class="form-select shadow-sm rounded-0" aria-label="Default select example" id="userExtention" name="userExtention">
+                                                <select class="form-select shadow-sm rounded-0" id="userExtension" name="userExtension">
                                                     <option value="" selected>None</option>
-                                                    <option value="Jr.">Jr.</option>
-                                                    <option value="Sr.">Sr.</option>
+                                                    <option value="Jr.">Junior.</option>
+                                                    <option value="Sr.">Senior.</option>
+                                                    <option value="II">The Second.</option>
+                                                    <option value="III">The Third.</option>
+                                                    <option value="IV">The Fourth.</option>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row gap-0">
                                         <div class="col-3">
+                                            <label class="form-label">Email Address: </label>
+                                            <input type="text" class="form-control shadow-sm rounded-0" id="userEmail" Name="userEmail" readonly>
+                                        </div>
+                                        <div class="col-3">
                                             <label class="form-label">Phone Number: </label>
                                             <input required type="text" class="form-control shadow-sm bg-body rounded-0" id="userPhoneNumber" Name="userPhoneNumber">
                                         </div>
                                         <div class="col-3">
                                             <label class="form-label">Birthday: </label>
-                                            <input type="date" class="form-control shadow-sm rounded-0" onchange="calculateAge()"  id="userBirthday" name="userBirthday">
+                                            <input readonly type="date" class="form-control shadow-sm rounded-0" onchange="calculateAge()"  id="userBirthday" name="userBirthday">
                                         </div>
                                         <div class="col-2">
                                             <label class="form-label">Age:</label>
-                                            <input type="number" class="form-control shadow-sm bg-body rounded-0" id="userAge" Name="userAge">
+                                            <input type="text" class="form-control shadow-sm  rounded-0" id="userAge" Name="userAge" readonly>
                                         </div>
                                     </div>
                                     <div class="row mt-4">
                                         <div class="col-3 d-flex ms-auto">
-                                            <button type="submit" readonly class="btn btn-primary px-3 py-2 rounded-0">Save Changes</button>
+                                            <button type="submit" readonly class="btn btn-primary px-4 py-2 rounded-0">Save Changes</button>
                                         </div>
                                     </div>
                                 </form>

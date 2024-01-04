@@ -1,11 +1,12 @@
 $(document).ready(function(){
     availableRoom();
     notAvailableRoom();
+    checkCancelledReservation();
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
-    }); 
+    });
 });
 
 // FETCH AVAILABLE ROOM FOR TABLE
@@ -49,7 +50,6 @@ $(document).ready(function(){
         });
     }).draw();
     }
-// FETCH AVAILABLE ROOM FOR TABLE
 
 // FETCH AVAILABLE ROOM FOR TABLE
     function notAvailableRoom(){
@@ -90,14 +90,23 @@ $(document).ready(function(){
         });
     }).draw();
     }
-// FETCH AVAILABLE ROOM FOR TABLE
 
-// ADD ROOM 
+// ADD ROOM
     $(document).ready(function () {
         $('#addRoomDetailsForm').on( 'submit' , function(e){
             e.preventDefault();
-            var currentForm = $('#addRoomDetailsForm')[0];
-            var data = new FormData(currentForm);
+            const currentForm = $('#addRoomDetailsForm')[0];
+            const data = new FormData(currentForm);
+            const extension = /(\.jpg|\.jpeg|\.png)$/i;
+            const fileInput = $('#roomPhoto');
+            var fileName = fileInput.val();
+            if (!extension.test(fileName)) {
+                Swal.fire(
+                    'Added Failed',
+                    'Sorry, the file is not supported',
+                    'error'
+                );
+            }else{
                 $.ajax({
                     url: "/addRoom",
                     type:"POST",
@@ -123,15 +132,21 @@ $(document).ready(function(){
                             'Sorry room has not stored',
                             'error'
                             )
+                        }else if(response == 2){
+                            Swal.fire(
+                            'Added Failed',
+                            'Sorry, room already exists.',
+                            'error'
+                            )
                         }
                     },
                     error:function(error){
                         console.log(error)
                     }
-                }) 
+                })
+            }
         });
     });
-// ADD ROOM
 
 // VIEW DETAILS OF ROOM
     function viewRoomDetails(id){
@@ -143,22 +158,21 @@ $(document).ready(function(){
             data: {roomId: id},
         })
         .done(function(response) {
-            $('#room_id').val(response.room_id),           
-            $('#roomNumber').val(response.room_number),           
-            $('#roomFloor').val(response.floor)           
-            $('#roomStart').val(response.room_number)           
-            $('#roomEnd').val(response.room_number)           
-            $('#roomPricePerHour').val(response.price_per_hour)           
-            $('#roomType').val(response.type_of_room)           
-            $('#roomBedNumber').val(response.number_of_bed)           
-            $('#roomMaxPerson').val(response.max_person)           
-            $('#detailsOfRoom').val(response.details)           
+            $('#room_id').val(response.room_id),
+            $('#roomNumber').val(response.room_number),
+            $('#roomFloor').val(response.floor)
+            $('#roomStart').val(response.room_number)
+            $('#roomEnd').val(response.room_number)
+            $('#roomPricePerHour').val(response.price_per_hour)
+            $('#roomType').val(response.type_of_room)
+            $('#roomBedNumber').val(response.number_of_bed)
+            $('#roomMaxPerson').val(response.max_person)
+            $('#detailsOfRoom').val(response.details)
             $('#roomPhoto').attr("src",response.photos)
         })
     }
-// VIEW DETAILS OF ROOM
 
-// UPDATE ROOM 
+// UPDATE ROOM
     $(document).ready(function () {
         $('#updateRoomForm').on( 'submit' , function(e){
             e.preventDefault();
@@ -189,10 +203,9 @@ $(document).ready(function(){
                 error:function(error){
                     console.log(error)
                 }
-            }) 
+            })
         });
     });
-// UPDATE ROOM 
 
 // DEACTIVATE ROOM
     function deactivateRoom(id){
@@ -224,8 +237,46 @@ $(document).ready(function(){
             });
             }
         });
+
+        async function showTermsAndConditions() {
+            const { value: accept } = await Swal.fire({
+              title: 'Are you sure?',
+              text: "Do you want to DEACTIVATE this ROOM?",
+              icon: 'question',
+              input: "checkbox",
+              inputValue: 1,
+              inputPlaceholder: `
+              I read the <a href='notesRemarks'>notes and remarks</a> before deactivating this.
+              `,
+              confirmButtonText: `
+                Continue&nbsp; <i class="fa fa-arrow-right"></i>
+              `,
+              inputValidator: (result) => {
+                return !result && "You need to read the <a href='notesRemarks'>notes and remarks</a> before deactivating this";
+              }
+            });
+
+            if (accept) {
+                $.ajax({
+                    url: '/deactivateRoom',
+                    type: 'GET',
+                    dataType: 'json',
+                    data: {roomId: id},
+                });
+                Swal.fire({
+                    title: 'DEACTIVATE SUCCESSFULLY',
+                    icon: 'success',
+                    showConfirmButton: false,
+                    timer: 1000,
+                }).then((result) => {
+                if (result) {
+                    $('#availableRoom').DataTable().ajax.reload();
+                }
+                });
+            }
+          }
+          showTermsAndConditions();
     }
-// DEACTIVATE ROOM
 
 // ACTIVATE ROOM
     function activateRoom(id){
@@ -258,6 +309,22 @@ $(document).ready(function(){
         }
     });
     }
-// ACTIVATE ROOM
 
-
+// CHECK CANCELLED RESERVATION
+    function checkCancelledReservation(){
+        $.ajax({
+            url: '/checkCancelledReservation',
+            type: 'GET',
+            dataType: 'json',
+        })
+        .done(function(response) {
+            if(response === 1){
+                Swal.fire({
+                    position: "top-center",
+                    icon: "warning",
+                    title: "SOMEONE CANCELLED THEIR BOOKING",
+                    footer: '<a href="/adminCancelledReservation">REDIRECT TO CANCELLED RESERVATION PAGE?</a>'
+                });
+            }
+        })
+    }

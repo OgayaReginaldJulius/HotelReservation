@@ -1,15 +1,16 @@
 $(document).ready(function(){
     pendingReservationTable();
-    acceptReservationTable();
-    declineReservationTable();
     ongoingReservationTable();
+    cancelledReservationTable();
+    unpaidReservationTable();
     completedReservationTable();
-    backOutReservationTable();
+    checkCancelledReservation();
+    unattendedReservationTable();
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
-    }); 
+    });
 });
 
 // FETCH ALL PENDING RESERVATION FOR TABLES
@@ -19,7 +20,6 @@ $(document).ready(function(){
             "emptyTable": "No Reservation Found"
         },
         "lengthChange": true,
-        "scrollCollapse": true,
         "paging": true,
         "info": true,
         "responsive": true,
@@ -55,7 +55,10 @@ $(document).ready(function(){
             "targets": 1
             },
             { "mData": function (data, type, row) {
-                return '<button type="button" data-title="Accept Reservation?" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top" onclick=acceptReservation('+data.reservation_id+') class="btn rounded-0 btn-outline-success btn-sm py-2 px-3"><i class="bi bi-check2-square"></i></button> <button type="button" onclick="declineReservation('+data.reservation_id+', '+data.user_id+')" class="btn rounded-0 ROUNDED-0 btn-outline-danger btn-sm py-2 px-3" data-title="Decline Reservation?"><i class="bi bi-x-square"></i></button>'
+                return "₱"+data.totalPayment+ ".00" ;
+            }},
+            { "mData": function (data, type, row) {
+                return '<button type="button" data-title="Set Reservation?" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top" onclick="ongoingReservation('+data.reservation_id+', '+data.room_id+')" class="btn rounded-0 btn-outline-secondary btn-sm py-2 px-3"><i class="bi bi-check2-square"></i></button></button> <button type="button" data-title="Not Attend?" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top" onclick="unAttendedReservation('+data.reservation_id+', '+data.room_id+')" class="btn rounded-0 btn-outline-danger btn-sm py-2 px-3"><i class="bi bi-x-square"></i></button></button>'
             }},
         ],
         order: [[1, 'asc']],
@@ -67,66 +70,8 @@ $(document).ready(function(){
         });
     }).draw();
     }
-// FETCH ALL PENDING RESERVATION FOR TABLES
 
-// FETCH ALL ACCEPT RESERVATION FOR TABLE
-    function acceptReservationTable(){
-        var table = $('#acceptReservationTable').DataTable({
-            "language": {
-                "emptyTable": "No Reservation Found"
-            },
-            "lengthChange": true,
-            "scrollCollapse": true,
-            "paging": true,
-            "info": true,
-            "responsive": true,
-            "ordering": false,
-            "aLengthMenu": [[25, 50, 75, -1], [25, 50, 75, "All"]],
-            "iDisplayLength": 25,
-            "ajax":{
-                "url":"/getAllAcceptReservation",
-                "dataSrc": "",
-            },
-            "columns":[
-                {"data":"reservation_id"},
-                { "mData": function (data, type, row) {
-                    if(data.extention != null){
-                        return data.firstname+ " " +data.lastname+ " " +data.extention;
-                    }else{
-                        return data.firstname+ " " +data.lastname;
-                    }
-                }},
-                { "mData": function (data, type, row) {
-                        return data.floor+ " - Room " +data.room_number;
-                }},
-                {"data": "start_dataTime",
-                    "render": function(data) {
-                    return moment(data).format('MMM DD, YYYY | hh:mm A');
-                },
-                "targets": 1
-                },
-                {"data": "end_dateTime",
-                    "render": function(data) {
-                    return moment(data).format('MMM DD, YYYY | hh:mm A');
-                },
-                "targets": 1
-                },
-                { "mData": function (data, type, row) {
-                    return '<button type="button" data-title="Set Reservation?" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top" onclick="ongoingReservation('+data.reservation_id+', '+data.room_id+')" class="btn rounded-0 btn-outline-success btn-sm py-2 px-3"><i class="bi bi-check2-square"></i></button> <button type="button" onclick="backOutReservation('+data.reservation_id+', '+data.user_id+')" class="btn rounded-0 ROUNDED-0 btn-outline-danger btn-sm py-2 px-3" data-title="Back Out Reservation?"><i class="bi bi-x-square"></i></button>'
-                }},
-            ],
-            order: [[1, 'asc']],
-        });
-        table.on('order.dt search.dt', function () {
-            let i = 1;
-            table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function (cell) {
-                this.data(i++);
-            });
-        }).draw();
-    }
-// FETCH ALL ACCEPT RESERVATION FOR TABLE
-
-// FETCH ALL ACCEPT RESERVATION FOR TABLE
+// FETCH ALL ONGOING RESERVATION FOR TABLE
     function ongoingReservationTable(){
         var table = $('#ongoingReservationTable').DataTable({
             "language": {
@@ -169,6 +114,9 @@ $(document).ready(function(){
                 "targets": 1
                 },
                 { "mData": function (data, type, row) {
+                    return "₱"+data.totalPayment+ ".00" ;
+                }},
+                { "mData": function (data, type, row) {
                     return '<button type="button" data-title="Complete Transaction?" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top" onclick="completeTransaction('+data.reservation_id+' , '+data.roomId+')" class="btn rounded-0 btn-outline-success btn-sm py-2 px-3"><i class="bi bi-check2-square"></i></button>'
                 }},
             ],
@@ -181,11 +129,10 @@ $(document).ready(function(){
             });
         }).draw();
     }
-// FETCH ALL ACCEPT RESERVATION FOR TABLE
 
-// FETCH ALL DECLINE RESERVATION FOR TABLE
-    function declineReservationTable(){
-        var table = $('#declineReservationTable').DataTable({
+// FETCH ALL CANCELLED RESERVATION FOR TABLE
+    function cancelledReservationTable(){
+        var table = $('#cancelledReservationTable').DataTable({
             "language": {
                 "emptyTable": "No Reservation Found"
             },
@@ -198,7 +145,7 @@ $(document).ready(function(){
             "aLengthMenu": [[25, 50, 75, -1], [25, 50, 75, "All"]],
             "iDisplayLength": 25,
             "ajax":{
-                "url":"/getAllDeclineReservation",
+                "url":"/getAllCancelledReservation",
                 "dataSrc": "",
             },
             "columns":[
@@ -225,11 +172,78 @@ $(document).ready(function(){
                 },
                 "targets": 1
                 },
-                {"data": "reservation_id",
-                    mRender: function (data, type, row) {
-                    return '<button type="button" data-title="View Reason?" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top" onclick=viewReasonOfDecline('+data+') class="btn rounded-0 btn-outline-secondary btn-sm py-2 px-3"><i class="bi bi-check2-square"></i></button>'
+                { "mData": function (data, type, row) {
+                    return "₱"+data.totalPayment+ ".00" ;
+                }},
+                { "mData": function (data, type, row) {
+                    if(data.is_noted != 1){
+
+                        return '<button type="button" data-title="View Reason?" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top" onclick="viewReason('+data.reservation_id+', '+data.room_id+')" class="btn rounded-0 btn-outline-secondary btn-sm py-2 px-3"><i class="bi bi-chat-dots"></i></button> <button type="button" data-title="Note This?" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top" onclick="noteCancelReservation('+data.reservation_id+')" class="btn rounded-0 btn-outline-secondary btn-sm py-2 px-3"><i class="bi bi-journal-check"></i></button>'
+                    }else{
+                        return '<button type="button" data-title="View Reason?" data-bs-toggle="tooltip" data-bs-placement="top" onclick="viewReason(' + data.reservation_id + ', ' + data.room_id + ')" class="btn rounded-0 btn-outline-secondary btn-sm py-2 px-3"><i class="bi bi-chat-dots"></i></button>';
+                    }
+                }},
+            ],
+            "createdRow": function(row, data, dataIndex) {
+                if (data.is_noted != 1) {
+                    $(row).addClass('highlighted-row');
                 }
-                }
+            },
+            order: [[1, 'asc']],
+        });
+        table.on('order.dt search.dt', function () {
+            let i = 1;
+            table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function (cell) {
+                this.data(i++);
+            });
+        }).draw();
+    }
+
+// FETCH ALL UNPAID RESERVATION FOR TABLE
+    function unpaidReservationTable(){
+        var table = $('#unpaidReservationTable').DataTable({
+            "language": {
+                "emptyTable": "No Reservation Found"
+            },
+            "lengthChange": true,
+            "scrollCollapse": true,
+            "paging": true,
+            "info": true,
+            "responsive": true,
+            "ordering": false,
+            "aLengthMenu": [[25, 50, 75, -1], [25, 50, 75, "All"]],
+            "iDisplayLength": 25,
+            "ajax":{
+                "url":"/getAllUnpaidReservation",
+                "dataSrc": "",
+            },
+            "columns":[
+                {"data":"reservation_id"},
+                { "mData": function (data, type, row) {
+                    if(data.extention != null){
+                        return data.firstname+ " " +data.lastname+ " " +data.extention;
+                    }else{
+                        return data.firstname+ " " +data.lastname;
+                    }
+                }},
+                { "mData": function (data, type, row) {
+                        return data.floor+ " - Room " +data.room_number;
+                }},
+                {"data": "start_dataTime",
+                    "render": function(data) {
+                    return moment(data).format('MMM DD, YYYY | hh:mm A');
+                },
+                "targets": 1
+                },
+                {"data": "end_dateTime",
+                    "render": function(data) {
+                    return moment(data).format('MMM DD, YYYY | hh:mm A');
+                },
+                "targets": 1
+                },
+                { "mData": function (data, type, row) {
+                    return "₱"+data.totalPayment+ ".00" ;
+                }},
             ],
             order: [[1, 'asc']],
         });
@@ -240,7 +254,6 @@ $(document).ready(function(){
             });
         }).draw();
     }
-// FETCH ALL DECLINE RESERVATION FOR TABLE
 
 // FETCH ALL COMPLETED TRANSACTION
     function completedReservationTable(){
@@ -284,6 +297,9 @@ $(document).ready(function(){
             },
             "targets": 1
             },
+            { "mData": function (data, type, row) {
+                return "₱"+data.totalPayment+ ".00" ;
+            }},
         ],
         order: [[1, 'asc']],
     });
@@ -294,155 +310,62 @@ $(document).ready(function(){
         });
     }).draw();
     }
-// FETCH ALL COMPLETED TRANSACTION
 
-// FETCH ALL COMPLETED TRANSACTION
-    function backOutReservationTable(){
-        var table = $('#backOutReservationTable').DataTable({
-            "language": {
-                "emptyTable": "No Reservation Found"
-            },
-            "lengthChange": true,
-            "scrollCollapse": true,
-            "paging": true,
-            "info": true,
-            "responsive": true,
-            "ordering": false,
-            "aLengthMenu": [[25, 50, 75, -1], [25, 50, 75, "All"]],
-            "iDisplayLength": 25,
-            "ajax":{
-                "url":"/getAllBackOutReservation",
-                "dataSrc": "",
-            },
-            "columns":[
-                {"data":"reservation_id"},
-                { "mData": function (data, type, row) {
-                    if(data.extention != null){
-                        return data.firstname+ " " +data.lastname+ " " +data.extention;
-                    }else{
-                        return data.firstname+ " " +data.lastname;
-                    }
-                }},
-                { "mData": function (data, type, row) {
-                        return data.floor+ " - Room " +data.room_number;
-                }},
-                {"data": "start_dataTime",
-                    "render": function(data) {
-                    return moment(data).format('MMM DD, YYYY | hh:mm A');
-                },
-                "targets": 1
-                },
-                {"data": "end_dateTime",
-                    "render": function(data) {
-                    return moment(data).format('MMM DD, YYYY | hh:mm A');
-                },
-                "targets": 1
-                },
-                { "mData": function (data, type, row) {
-                    return '<button type="button" data-title="View Reason?" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Tooltip on top" onclick=viewReasonOfBackOut('+data.reservation_id+') class="btn rounded-0 btn-outline-secondary btn-sm py-2 px-3"><i class="bi bi-check2-square"></i></button>'
-                }},
-            ],
-            order: [[1, 'asc']],
-        });
-        table.on('order.dt search.dt', function () {
-            let i = 1;
-            table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function (cell) {
-                this.data(i++);
-            });
-        }).draw();
-    }
-// FETCH ALL COMPLETED TRANSACTION
-
-// DECLINE RESERVATION
-    function declineReservation(reservationId, userId){
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you want to DECLINE this BOOKING?",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d72323',
-            confirmButtonText: 'Yes, Continue'
-            }).then((result) => {
-            if (result.isConfirmed) {
-            (async () => {
-                const { value: reason } = await Swal.fire({
-                    input: 'textarea',
-                    title: 'Reason of Decline?',
-                    text: "once you submit, You won't be able to revert this",
-                    inputPlaceholder: 'Type your reason here...',
-                    inputAttributes: {
-                    'aria-label': 'Type your message here'
-                    },
-                    showCancelButton: true
-                })
-                if(reason){
-                    $.ajax({
-                        url: '/declineReservation',
-                        type: 'GET',
-                        dataType: 'text',
-                        data: {reason: reason, reservationId: reservationId,  userId: userId},
-                        success: function(response) {
-                            if(response == 1){
-                                Swal.fire({
-                                    title: 'DECLINE SUCCESSFULLY',
-                                    icon: 'success',
-                                    showConfirmButton: false,
-                                    timer: 1000,
-                                }).then((result) => {
-                                if (result) {
-                                    $('#pendingReservationTable').DataTable().ajax.reload();
-                                }
-                                });
-                            }else if(response == 0){
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Decline Failed',
-                                    text: 'Something wrong at the backend',
-                                })
-                            }
-                        }
-                    });
+// FETCH ALL UNATTENDED TRANSACTION
+    function unattendedReservationTable(){
+    var table = $('#unattendedReservationTable').DataTable({
+        "language": {
+            "emptyTable": "No Reservation Found"
+        },
+        "lengthChange": true,
+        "scrollCollapse": true,
+        "paging": true,
+        "info": true,
+        "responsive": true,
+        "ordering": false,
+        "aLengthMenu": [[25, 50, 75, -1], [25, 50, 75, "All"]],
+        "iDisplayLength": 25,
+        "ajax":{
+            "url":"/getAllUnattendedReservation",
+            "dataSrc": "",
+        },
+        "columns":[
+            {"data":"reservation_id"},
+            { "mData": function (data, type, row) {
+                if(data.extention != null){
+                    return data.firstname+ " " +data.lastname+ " " +data.extention;
+                }else{
+                    return data.firstname+ " " +data.lastname;
                 }
-            })()
-            }
+            }},
+            { "mData": function (data, type, row) {
+                    return data.floor+ " - Room " +data.room_number;
+            }},
+            {"data": "start_dataTime",
+                "render": function(data) {
+                return moment(data).format('MMM DD, YYYY | hh:mm A');
+            },
+            "targets": 1
+            },
+            {"data": "end_dateTime",
+                "render": function(data) {
+                return moment(data).format('MMM DD, YYYY | hh:mm A');
+            },
+            "targets": 1
+            },
+            { "mData": function (data, type, row) {
+                return "₱"+data.totalPayment+ ".00" ;
+            }},
+        ],
+        order: [[1, 'asc']],
+    });
+    table.on('order.dt search.dt', function () {
+        let i = 1;
+        table.cells(null, 0, { search: 'applied', order: 'applied' }).every(function (cell) {
+            this.data(i++);
         });
-    } 
-// DECLINE RESERVATION
-
-// ACCEPT RESERVATION
-    function acceptReservation(id){
-        Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to ACCEPT this BOOKING?",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, Accept it'
-        }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-            url: '/acceptReservation',
-            type: 'GET',
-            dataType: 'json',
-            data: {reservationId: id},
-        });
-        Swal.fire({
-            title: 'ACCEPT BOOKING',
-            text: "Reservation was accept successfully",
-            icon: 'success',
-            showConfirmButton: false,
-            timer: 1500,
-        }).then((result) => {
-        if (result) {
-            $('#pendingReservationTable').DataTable().ajax.reload();
-        }
-        });
-        }
-        });
-    } 
-// ACCEPT RESERVATION
+    }).draw();
+    }
 
 // SET RESERVATION
     function ongoingReservation(reservationId , roomId){
@@ -471,7 +394,7 @@ $(document).ready(function(){
                         timer: 1500,
                     }).then((result) => {
                     if (result) {
-                        $('#acceptReservationTable').DataTable().ajax.reload();
+                        $('#ongoingReservationTable').DataTable().ajax.reload();
                     }
                     });
                 }else if(response == 2){
@@ -482,11 +405,10 @@ $(document).ready(function(){
                     })
                 }
             }
-        });       
+        });
         }
         });
-    } 
-// SET RESERVATION
+    }
 
 // COMPLETE TRANSACTION
     function completeTransaction(reservationId){
@@ -529,95 +451,118 @@ $(document).ready(function(){
         });
         }
         });
-    } 
-// COMPLETE TRANSACTION
+    }
 
-// BACK OUT RESERVATION
-    function backOutReservation(reservationId, userId){
+// VIEW CANCELLED REASON
+    function viewReason(id){
+        $('#cancelledReasonModal').modal('show')
+        $.ajax({
+            url: '/viewReasonCancelled',
+            type: 'GET',
+            dataType: 'json',
+            data: {reservationId: id},
+        })
+        .done(function(response) {
+            $('#cancelledReason').text(response.reason);
+            $('#cancelledLast').text(moment(response.created_at).format('MMM DD, YYYY | hh:mm A'));
+        })
+    }
+
+// NOTE CANCEL RESERVATION
+    function noteCancelReservation(id){
         Swal.fire({
             title: 'Are you sure?',
-            text: "Do you want to BACK OUT this BOOKING?",
+            text: "Do you want to NOTE this BOOKING?",
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d72323',
+            cancelButtonColor: '#d33',
             confirmButtonText: 'Yes, Continue'
             }).then((result) => {
             if (result.isConfirmed) {
-            (async () => {
-                const { value: reason } = await Swal.fire({
-                    input: 'textarea',
-                    title: 'Reason of Back Out?',
-                    text: "once you submit, You won't be able to revert this",
-                    inputPlaceholder: 'Type your reason here...',
-                    inputAttributes: {
-                    'aria-label': 'Type your message here'
-                    },
-                    showCancelButton: true
-                })
-                if(reason){
-                    $.ajax({
-                        url: '/adminBackOutReservationFunction',
-                        type: 'GET',
-                        dataType: 'text',
-                        data: {reason: reason, reservationId: reservationId,  userId: userId},
-                        success: function(response) {
-                            if(response == 1){
-                                Swal.fire({
-                                    title: 'BACK OUT SUCCESSFULLY',
-                                    icon: 'success',
-                                    showConfirmButton: false,
-                                    timer: 1000,
-                                }).then((result) => {
-                                if (result) {
-                                    $('#acceptReservationTable').DataTable().ajax.reload();
-                                }
-                                });
-                            }else if(response == 0){
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Back Out Failed',
-                                    text: 'Something wrong at the backend',
-                                })
-                            }
+                $.ajax({
+                url: '/noteCancelReservation',
+                type: 'GET',
+                dataType: 'json',
+                data: {reservationId: id},
+                success: function(response) {
+                    if(response == 1){
+                        Swal.fire({
+                            title: 'SUCCESSFULLY NOTED',
+                            text: "Reservation was completely noted",
+                            icon: 'success',
+                            showConfirmButton: false,
+                            timer: 1500,
+                        }).then((result) => {
+                        if (result) {
+                            $('#cancelledReservationTable').DataTable().ajax.reload();
                         }
-                    });
+                        });
+                    }
                 }
-            })()
+            });
+            }
+            });
+    }
+
+ // CHECK CANCELLED RESERVATION
+    function checkCancelledReservation(){
+        $.ajax({
+            url: '/checkCancelledReservation',
+            type: 'GET',
+            dataType: 'json',
+        })
+        .done(function(response) {
+            if(response === 1){
+                Swal.fire({
+                    position: "top-center",
+                    icon: "warning",
+                    title: "SOMEONE CANCELLED THEIR BOOKING",
+                    footer: '<a href="/adminCancelledReservation">REDIRECT TO CANCELLED RESERVATION PAGE?</a>'
+                });
+            }
+        })
+    }
+
+// NOT ATTENDED RESERVATION
+    function unAttendedReservation(reservationId , roomId){
+        Swal.fire({
+        title: 'Are you sure?',
+        text: "The customer not attend?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Continue'
+        }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+            url: '/unAttendedReservation',
+            type: 'GET',
+            dataType: 'json',
+            data: {reservationId: reservationId, roomId: roomId},
+            success: function(response) {
+                if(response == 1){
+                    Swal.fire({
+                        title: 'UNATTENDED BOOKING',
+                        text: "Reservation was set to unattended successfully",
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 1500,
+                    }).then((result) => {
+                    if (result) {
+                        $('#ongoingReservationTable').DataTable().ajax.reload();
+                    }
+                    });
+                }else if(response == 2){
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Set Failed',
+                        text: 'The BOOKING was not reach the Check In Date and Time',
+                    })
+                }
             }
         });
-    } 
-// BACK OUT RESERVATION
-
-// VIEW DECLINE REASON
-    function viewReasonOfDecline(id){
-        $('#declineReasonModal').modal('show')
-        $.ajax({
-            url: '/viewReasonDecline',
-            type: 'GET',
-            dataType: 'json',
-            data: {reservationId: id},
-        })
-        .done(function(response) {
-            $('#declinedReason').text(response.reason); 
-        })
-    } 
-// VIEW DECLINE REASON
-
-// VIEW BACK OUT REASON
-    function viewReasonOfBackOut(id){
-        $('#backOutReasonModal').modal('show')
-        $.ajax({
-            url: '/viewReasonBackOut',
-            type: 'GET',
-            dataType: 'json',
-            data: {reservationId: id},
-        })
-        .done(function(response) {
-            $('#backOutReason').text(response.reason); 
-        })
-    } 
-// VIEW BACK OUT REASON
-
-
-
+        }
+        });
+    }

@@ -1,90 +1,89 @@
 $(document).ready(function(){
-    totalPendingReservation();
-    totalOnGoingReservation();
-    totalCompletedReservation();
-    totalCustomer();
-    getBackOutContent();
+    getAllTotalForAdmin();
+    chart();
+    checkCancelledReservation();
 });
 
-
-    function totalPendingReservation(){
+    function getAllTotalForAdmin(){
         $.ajax({
-            url: '/totalPendingReservationForAdmin',
+            url: '/getAllTotalForAdmin',
             method: 'GET',
             success : function(data) {
-                $("#totalPendingReservation").html(data);
+                $("#totalPendingReservation").html(data.totalPendingReservation);
+                $("#totalOnGoingReservation").html(data.totalOnGoingReservation);
+                $("#totalCompletedReservation").html(data.totalCompletedReservation);
+                $("#totalCustomer").html(data.totalCustomer);
+
             }
         })
     }
 
-    function totalOnGoingReservation(){
+    function chart(){
         $.ajax({
-            url: '/totalOnGoingReservationForAdmin',
+            url: 'paymentGraph',
             method: 'GET',
             success : function(data) {
-                $("#totalOnGoingReservation").html(data);
+                if(data != ""){
+                    const ctx = document.getElementById('myChart');
+                    new Chart(ctx, {
+                      type: 'line',
+                      data: {
+                        labels: data.months,
+                        datasets: [{
+                          label: 'Sales Per Month',
+                          data : data.sales,
+                          borderWidth: 1,
+                          backgroundColor: [
+                            '#f8d38d',
+                          ],
+                            borderColor: [
+                                '#f8d38d',
+                            ],
+                        }]
+                      },
+                      options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max:30000
+                            },
+                        }
+                        }
+                    });
+                }else{
+                    var target = document.getElementById("visualization");
+                    target.innerHTML += "<div class='text-danger fs-4 text-center' style='position:absolute; top:19rem; width:100%' role='alert'>NO DATA AVAILABLE</div>";
+                }
             }
         })
     }
 
-    function totalCompletedReservation(){
+    // AUTOMATIC DELETE THE UNPAID RESERVATION
+    if(window.location.href === 'http://127.0.0.1:8000/adminDashboard'){
         $.ajax({
-            url: '/totalCompletedReservationForAdmin',
-            method: 'GET',
-            success : function(data) {
-                $("#totalCompletedReservation").html(data);
-            }
-        })
-    }
-
-    function totalCustomer(){
-        $.ajax({
-            url: '/totalCustomerForAdmin',
-            method: 'GET',
-            success : function(data) {
-                $("#totalCustomer").html(data);
-            }
-        })
-    }
-
-    function getBackOutContent(){
-        $.ajax({
-            url: '/getBackOutContentForAdmin',
-            method: 'GET',
-            success : function(data) {
-                $("#fetchAllBackOut").html(data);
-            }
-        })
-    }
-
-    function noteBackOutContent(id){
-        Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you want to NOTE this LETTER?",
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, Note it'
-        }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-            url: '/archivedCancelledReservation',
+            url: '/deleteUnpaidReservation',
             type: 'GET',
             dataType: 'json',
-            data: {reservationId: id},
-        });
-        Swal.fire({
-            title: 'ACCEPT BOOKING',
-            text: "Reservation was accept successfully",
-            icon: 'success',
-            showConfirmButton: false,
-            timer: 1500,
-        }).then((result) => {
-        if (result) {
-            getBackOutContent();
-        }
-        });
-        }
-        });
+        })
+        .done(function(response) {
+            $('#ongoingReservationTable').DataTable().ajax.reload();
+        })
+    }
+
+    function checkCancelledReservation(){
+        $.ajax({
+            url: '/checkCancelledReservation',
+            type: 'GET',
+            dataType: 'json',
+        })
+        .done(function(response) {
+            if(response === 1){
+                Swal.fire({
+                    position: "top-center",
+                    icon: "warning",
+                    title: "SOMEONE CANCELLED THEIR BOOKING",
+                    footer: '<a href="/adminCancelledReservation">REDIRECT TO CANCELLED RESERVATION PAGE?</a>'
+                });
+            }
+        })
     }

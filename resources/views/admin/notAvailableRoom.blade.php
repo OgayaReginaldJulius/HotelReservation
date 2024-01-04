@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>Harbor View</title>
+    <title>HOSS</title>
         <!-- CSS -->
-            <link rel="shortcut icon" href="{{ URL('/img/whitelogo.png')}}" type="image/x-icon">
+            <link rel="shortcut icon" href="{{ URL('/img/icon.png')}}" type="image/x-icon">
             <link href="{{ asset('/css/adminDashboard.css') }}" rel="stylesheet">
         <!-- CSS -->
     @include('cdn')
@@ -36,7 +36,7 @@
                                 </ul>
                             </div>
                         </div>
-                    </nav>              
+                    </nav>
                 <!-- NAV BAR -->
 
                 <!-- MAIN CONTENT -->
@@ -51,7 +51,7 @@
                                         <a class="nav-link active" href="#">Not Available Room</a>
                                     </li>
                                     <li class="nav-item ms-auto">
-                                        <a href="/addNewRoom" class="btn btn-primary ms-auto py-2 px-3 btn-sm rounded-0 mb-1">New Room <i class="bi bi-plus-circle"></i></a>
+                                        <a href="/addNewRoom" class="btn btn-primary ms-auto py-2 px-3 btn-sm rounded-0 mb-1">Add New Room <i class="bi bi-plus"></i></a>
                                     </li>
                                 </ul>
                                 <table id="notAvailableRoom" class="table table-sm table-bordered text-center align-middle">
@@ -127,12 +127,10 @@
                                     <div class="col-4">
                                         <label class="form-label">Type of Room:</label>
                                         <select class="form-select shadow-sm rounded-0" aria-label="Default select example" id="roomType" name="roomType">
-                                            <option value="Single Room" selected>Single Room</option>
-                                            <option value="Twin Room">Twin Room</option>
-                                            <option value="Double Room">Double Room</option>
-                                            <option value="Triple Room">Triple Room</option>
-                                            <option value="Quad Room">Quad Room</option>
-                                            <option value="Interconnecting Room">Interconnecting Room</option>
+                                            <option value="Standard Room" selected>Standard Room</option>
+                                            <option value="Superior Double Room">Superior Double Room</option>
+                                            <option value="Single Deluxe Room">Single Deluxe Room</option>
+                                            <option value="Executive Deluxe King Room">Executive Deluxe King Room</option>
                                         </select>
                                     </div>
                                     <div class="col-4">
